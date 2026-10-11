@@ -1,0 +1,59 @@
+# MANUAL ONLY. Falco is a powerful NODE sensor, even with the capabilities below.
+# For one disposable Linux node running no real workloads or data.
+image:
+  registry: public.ecr.aws
+  repository: falcosecurity/falco
+  tag: '0.45.0@sha256:788f1129c542171813083d4afc61b16730a47dde8c23d9c39370acef996349b6'
+fullnameOverride: falco-lab
+driver:
+  kind: modern_ebpf
+  modernEbpf:
+    leastPrivileged: true
+  loader:
+    enabled: false
+collectors:
+  containerEngine:
+    enabled: true
+    pluginRef: ghcr.io/falcosecurity/plugins/plugin/container:0.7.4
+  kubernetes:
+    enabled: false
+falcoctl:
+  artifact:
+    install:
+      enabled: true
+    follow:
+      enabled: false
+  config:
+    artifact:
+      install:
+        refs: []
+falcosidekick:
+  enabled: false
+responseActions:
+  enabled: false
+falco:
+  # Only our custom files. This is NOT a production detection ruleset.
+  rules_files:
+    - /etc/falco/rules.d
+  json_output: true
+  json_include_output_property: true
+  priority: debug
+  log_syslog: false
+  stdout_output:
+    enabled: true
+  syslog_output:
+    enabled: false
+  http_output:
+    enabled: false
+  program_output:
+    enabled: false
+  syscall_event_drops:
+    threshold: 0
+    actions: [log, alert]
+resources:
+  requests:
+    cpu: 100m
+    memory: 512Mi
+  limits:
+    cpu: '1'
+    memory: 1Gi

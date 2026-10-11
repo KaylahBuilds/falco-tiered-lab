@@ -1,0 +1,27 @@
+# Native rules compilation only. Register container fields without any engine sockets.
+engine:
+  kind: nodriver
+rules_files: []
+plugins:
+  - name: container
+    library_path: libcontainer.so
+    init_config:
+      engines:
+        docker: {enabled: false}
+        podman: {enabled: false}
+        containerd: {enabled: false}
+        cri: {enabled: false}
+        lxc: {enabled: false}
+        libvirt_lxc: {enabled: false}
+        bpm: {enabled: false}
+load_plugins: [container]
+watch_config_files: false
+json_output: true
+log_stderr: true
+log_syslog: false
+stdout_output:
+  enabled: true
+syslog_output:
+  enabled: false
+webserver:
+  enabled: false

@@ -1,0 +1,7 @@
+# Deliberate negative input. Never add this to a live rules_files list.
+- rule: Deliberately Invalid Field
+  desc: The native validator must reject an unknown filter field.
+  condition: evt.type = execve and lab.definitely_missing_field = true
+  output: Invalid test (%proc.name)
+  priority: NOTICE
+  source: syscall
