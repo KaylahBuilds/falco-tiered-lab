@@ -1,0 +1,32 @@
+# Merge AFTER deploy/values.yaml. Standard AKS Ubuntu/containerd nodes only.
+nodeSelector:
+  kubernetes.io/os: linux
+  kubernetes.io/arch: amd64
+  security-lab: enabled
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.azure.com/agentpool
+              operator: Exists
+            - key: type
+              operator: NotIn
+              values: [virtual-kubelet]
+tolerations: []
+controller:
+  kind: daemonset
+collectors:
+  containerEngine:
+    engines:
+      docker: {enabled: false}
+      podman: {enabled: false}
+      containerd: {enabled: true, sockets: [/run/containerd/containerd.sock]}
+      cri: {enabled: true, sockets: [/run/containerd/containerd.sock]}
+      lxc: {enabled: false}
+      libvirt_lxc: {enabled: false}
+      bpm: {enabled: false}
+metrics:
+  enabled: false
+  service:
+    create: false

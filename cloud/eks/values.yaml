@@ -1,0 +1,32 @@
+# Merge AFTER deploy/values.yaml. EKS managed EC2 AL2023 nodes only.
+nodeSelector:
+  kubernetes.io/os: linux
+  kubernetes.io/arch: amd64
+  security-lab: enabled
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: eks.amazonaws.com/nodegroup
+              operator: Exists
+            - key: eks.amazonaws.com/compute-type
+              operator: NotIn
+              values: [fargate, auto]
+tolerations: []
+controller:
+  kind: daemonset
+collectors:
+  containerEngine:
+    engines:
+      docker: {enabled: false}
+      podman: {enabled: false}
+      containerd: {enabled: true, sockets: [/run/containerd/containerd.sock]}
+      cri: {enabled: true, sockets: [/run/containerd/containerd.sock]}
+      lxc: {enabled: false}
+      libvirt_lxc: {enabled: false}
+      bpm: {enabled: false}
+metrics:
+  enabled: false
+  service:
+    create: false

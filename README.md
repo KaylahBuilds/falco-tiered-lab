@@ -43,6 +43,16 @@ Follow [the disposable-cluster guide](docs/CLUSTER-LAB.md) only on a Linux clust
 
 No cluster is installed or modified by the offline examples or CI. The runtime guide is manual, and Falcosidekick forwarding and Falco Talon response actions are disabled. Current reviewed versions are Falco **0.45.0** and Helm chart **9.2.0**, checked on 2026-10-10. The optional BusyBox workload and container plugin use version tags; those tags are mutable. This repository does not claim a fully digest-locked deployment.
 
+## Azure AKS and Amazon EKS examples
+
+[Start with the cloud guide](cloud/README.md), then choose [AKS](cloud/aks/README.md) or [EKS](cloud/eks/README.md). Both paths reuse the three tiers above:
+
+- **Terraform foundations:** optional, dedicated private-API sandbox clusters with real Linux worker nodes. The AKS and EKS roots are separate, so you can use just one cloud.
+- **Terraform add-on:** a separate Helm-based install into an explicitly selected existing cluster. It loads the two lab rule files and cloud-specific node/runtime settings.
+- **Runtime acceptance:** check eligible-node coverage, kernel/eBPF support, container metadata, positive and negative events, then run the offline triage exercise. Cleanup is explicit and manual.
+
+These examples target Ubuntu AKS nodes and AL2023 EKS managed EC2 nodes, not Windows nodes, virtual nodes, EKS Fargate, or EKS Auto Mode. A private API requires a runner or workstation with private network access. Terraform creates billable resources only if you choose to apply it; CI performs mocked Terraform tests and Helm rendering without cloud credentials or deployment authority.
+
 ## Layout
 
 ```text
@@ -50,6 +60,7 @@ tier-1-visibility/       Marker rule and visibility acceptance checks
 tier-2-tuning/           Shell rule, exact exception, and regression matrix
 tier-3-response/         Offline triage exercise and human response runbook
 deploy/                 Manual-only Helm values and bounded demo pods
+cloud/                  AKS/EKS guides, Terraform foundations/add-on, render checks
 ci/                     Native Falco validation without collection privileges
 lab/                    Standard-library alert-routing utility
 fixtures/               Explicitly synthetic Falco-shaped JSON records
@@ -67,4 +78,3 @@ Start with [SECURITY.md](SECURITY.md) before handling real event data. Do not co
 - [Falco command-line arguments](https://falco.org/docs/reference/daemon/cli-arguments/)
 - [Container plugin and Kubernetes metadata](https://github.com/falcosecurity/plugins/tree/main/plugins/container)
 - [Falco Helm chart](https://github.com/falcosecurity/charts/tree/falco-9.2.0/charts/falco)
-
