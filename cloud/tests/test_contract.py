@@ -3,11 +3,18 @@ from pathlib import Path
 import unittest
 
 import yaml
+from check_render import read_rules
 
 ROOT = Path(__file__).resolve().parents[2]
 
 
 class CloudSourceContracts(unittest.TestCase):
+    def test_falco_bare_equality_operators_survive_comparison(self):
+        text = (ROOT / "tier-2-tuning/rules.yaml").read_text()
+        self.assertEqual(read_rules(text)[0]["exceptions"][0]["comps"], ["=", "=", "="])
+        self.assertEqual(read_rules(text), read_rules(text.replace("comps: [=, =, =]", "comps: ['=', '=', '=']")))
+        self.assertNotEqual(read_rules(text), read_rules(text.replace("comps: [=, =, =]", "comps: ['!=', '=', '=']")))
+
     def test_profiles_require_dedicated_nodes_and_containerd(self):
         for platform in ("aks", "eks"):
             values = yaml.safe_load((ROOT / "cloud" / platform / "values.yaml").read_text())

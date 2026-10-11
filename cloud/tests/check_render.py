@@ -12,6 +12,13 @@ def require(condition, message):
         raise ValueError(message)
 
 
+def read_rules(text):
+    # Falco accepts bare '=' exception operators. PyYAML's SafeLoader assigns
+    # these an unsupported YAML-1.1 value tag. Compare the rule structures as
+    # strings instead; actual field/operator/type validation belongs to Falco.
+    return yaml.load(text, Loader=yaml.BaseLoader)
+
+
 def check(platform, documents):
     resources = [doc for doc in documents if doc]
     daemonsets = [doc for doc in resources if doc.get("kind") == "DaemonSet"]
@@ -55,7 +62,7 @@ def check(platform, documents):
     require(config["load_plugins"] == ["container"], "Unexpected metadata plugin")
     rules = maps["falco-lab-rules"]
     for name, path in (("tier1.yaml", "tier-1-visibility/rules.yaml"), ("tier2.yaml", "tier-2-tuning/rules.yaml")):
-        require(yaml.safe_load(rules[name]) == yaml.safe_load((ROOT / path).read_text()), f"Divergent {name}")
+        require(read_rules(rules[name]) == read_rules((ROOT / path).read_text()), f"Divergent {name}")
     require(set(rules) == {"tier1.yaml", "tier2.yaml"}, "Unexpected custom rules")
     for resource in resources:
         require(resource.get("kind") != "Ingress", "No public ingress in a sensor example")

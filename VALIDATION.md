@@ -16,10 +16,21 @@ The native Falco `--validate` invocation checks the actual rule parser/compiler 
 
 The Python tests verify the behavior of an offline alert consumer. They **do not** duplicate Falco's condition evaluator, validate exception matching, replay syscalls, or prove alert delivery. The JSON fixtures are hand-authored, not recorded Falco output.
 
-## Not executed or claimed
+## Cloud validation and remaining limits
+
+### Cloud validation suite
+
+The AKS/EKS extension adds native provider validation and **17 mocked Terraform plan tests**: six for AKS, six for EKS and five for the Falco add-on. CI uses Terraform 1.9.8, AzureRM 5.9.0, AWS 6.68.0, Helm provider 3.1.1 and Kubernetes provider 2.38.0. Provider initialization downloads public packages; mocked plans do not call cloud or Kubernetes APIs.
+
+Five cloud source checks cover placement, runtime configuration, actual rule-file reuse, bounded demo pods, and a regression for Falco's bare `=` comparison syntax. Helm 3.22.0 renders chart 9.2.0 for both AKS and EKS; the checker inspects the DaemonSet, image, node selection, capabilities, modern eBPF engine, containerd mount/configuration, embedded rules and absence of public services or forwarding/response components. Native Falco compilation remains the semantic rule check; the Python YAML comparison is not a rule interpreter.
+
+Use the [commit-specific CI runs](https://github.com/KaylahBuilds/falco-tiered-lab/actions/workflows/checks.yml) to confirm all jobs passed for the revision being reviewed. A source check, a mock plan and a chart render establish different contracts. None proves a real sensor is healthy, collects events, enriches metadata or covers every node.
+
+### Remaining live checks
 
 - No Kubernetes cluster, Helm install, privileged/capability-bearing node sensor, live rule match, live exception exercise, eBPF attachment, or cleanup run was executed during authoring.
-- Local Docker, Helm, kubectl and POSIX-shell execution were not available in the authoring environment. Native container validation ran on GitHub-hosted Linux CI instead. The chart commands and Kubernetes resources have been source-reviewed, but no Helm render or Kubernetes API validation is claimed here.
+- Local Docker, Helm, kubectl and POSIX-shell execution were not available in the authoring environment. Native container validation and chart rendering use GitHub-hosted Linux CI instead. No Kubernetes API validation or live cloud deployment is claimed.
+- No real AWS/Azure plan, apply, identity authorization, quota/version check, private API/DNS connection, managed-node startup, upgrade, billing check or cloud teardown was executed. Region/version availability is an operator prerequisite, not established by synthetic test inputs.
 - No production alert ingestion, SIEM delivery, authenticated alert channel, persistent deduplication, response integration, or automatic remediation was activated.
 - No image signature/attestation was independently verified. The Falco image digest is documented from official publication evidence; remaining manual-deployment dependencies use mutable version tags.
 - No admission policies, branch protection, required reviews, organization settings, or production incident procedures were configured by these examples.
